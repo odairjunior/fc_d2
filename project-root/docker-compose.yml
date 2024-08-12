@@ -1,0 +1,40 @@
+version: '3.7'
+
+services:
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: nodedb
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - app-network
+
+  node-app:
+    build: ./node-app
+    volumes:
+      - ./node-app:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  nginx:
+    build: ./nginx
+    ports:
+      - "8080:80"
+    depends_on:
+      - node-app
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  dbdata:
